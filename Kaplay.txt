@@ -1,0 +1,2322 @@
+KAPLAY
+Initialize KAPLAY context. The starting point of all KAPLAY games.
+// Start KAPLAY with default options (will create a fullscreen canvas under <body>)
+kaplay()
+
+// Init with some options
+kaplay({
+    width: 320,
+    height: 240,
+    font: "sans-serif",
+    canvas: document.querySelector("#mycanvas"),
+    background: [ 0, 0, 255, ],
+})
+
+// All KAPLAY functions are imported to global after calling kaplay()
+add()
+onUpdate()
+onKeyPress()
+vec2()
+
+// If you want to prevent KAPLAY from importing all functions to global and use a context handle for all KAPLAY functions
+const k = kaplay({ global: false })
+
+k.add(...)
+k.onUpdate(...)
+k.onKeyPress(...)
+k.vec2(...)
+quit(): void
+End everything.
+
+sincev2000.0
+
+KAPLAYOpt<TPlugin, TButtonDef>:
+KAPLAY configurations.
+
+width?: number
+Width of game.
+
+height?: number
+Height of game.
+
+scale?: number
+Pixel scale / size.
+
+stretch?: boolean
+If stretch canvas to container when width and height is specified
+
+letterbox?: boolean
+When stretching if keep aspect ratio and leave black bars on remaining spaces.
+
+debug?: boolean
+If register debug buttons (default true)
+
+debugKey?: Key
+Key that toggles debug mode
+
+font?: string
+Default font (defaults to "monospace").
+
+pixelDensity?: number
+Device pixel scale (defaults to 1, high pixel density will hurt performance).
+
+sincev3000.0
+
+crisp?: boolean
+Disable antialias and enable sharp pixel display.
+
+canvas?: HTMLCanvasElement
+The canvas DOM element to use. If empty will create one.
+
+root?: HTMLElement
+The container DOM element to insert the canvas if created. Defaults to document.body.
+
+background?: RGBValue | RGBAValue | string
+Background color. E.g. [ 0, 0, 255 ] for solid blue background, or [ 0, 0, 0, 0 ] for transparent background. Accepts RGB value array or string hex codes.
+
+texFilter?: TexFilter
+Default texture filter.
+
+logMax?: number
+How many log messages can there be on one screen (default 8).
+
+logTime?: number
+How many seconds log messages stay on screen (default 4).
+
+sincev3000.1
+
+hashGridSize?: number
+Size of the spatial hash grid for collision detection (default 64).
+
+sincev3000.0
+
+touchToMouse?: boolean
+If translate touch events as mouse clicks (default true).
+
+loadingScreen?: boolean
+If KAPLAY should render a default loading screen when assets are not fully ready (default true).
+
+sincev3000.0
+
+backgroundAudio?: boolean
+If pause audio when tab is not active (default false).
+
+sincev3000.0
+
+gamepads?: Record<string, GamepadDef>
+Custom gamepad definitions (see gamepad.json for reference of the format).
+
+sincev3000.0
+
+buttons?: TButtonDef
+Defined buttons for input binding.
+
+sincev30010
+
+maxFPS?: number
+Limit framerate to an amount per second.
+
+sincev3000.0
+
+focus?: boolean
+If focus on the canvas on start (default true).
+
+sincev3001.0
+
+global?: boolean
+If import all KAPLAY functions to global (default true).
+
+plugins?: TPlugin
+List of plugins to import.
+
+burp?: boolean
+Enter burp mode.
+
+tagsAsComponents?: boolean
+Make component's id ("sprite" for sprite() comp) be added as tags. That means .is() will return true for components with that id.
+
+defaulttrue
+
+experimentalThis feature is in experimental phase, it will be fully released in v3001.1.0
+
+loadRoot(path?: string): string
+Sets the root for all subsequent resource urls. This is useful when you want to load assets from a different domain, or setup a base path for all assets.
+
+parampath- The root path.
+
+loadRoot("https://myassets.com/");
+loadSprite("bean", "sprites/bean.png"); // will resolve to "https://myassets.com/sprites/bean.png"
+
+loadRoot("./"); // useful for Itch.io
+loadSprite(name: string | null, src: LoadSpriteSrc | LoadSpriteSrc[], opt?: LoadSpriteOpt): Asset<SpriteData>
+Load a sprite into asset manager, with name and resource url and optional config.
+
+paramname- The asset name.
+
+paramsrc- The resource url.
+
+paramopt- The optional config.
+
+// due to browser policies you'll need a static file server to load local files
+loadSprite("bean", "bean.png");
+loadSprite("apple", "https://play.kaplayjs.com/sprites/apple.png");
+
+// slice a spritesheet and add anims manually
+loadSprite("bean", "bean.png", {
+    sliceX: 4,
+    sliceY: 1,
+    anims: {
+        run: {
+            from: 0,
+            to: 3,
+        },
+        jump: {
+            from: 3,
+            to: 3,
+        },
+    },
+});
+returnsThe asset data.
+
+sincev2000.0
+
+loadSpriteAtlas(src: LoadSpriteSrc, data: SpriteAtlasData): Asset<Record>
+Load sprites from a sprite atlas.
+
+paramsrc- The image resource url.
+
+paramdata- The sprite atlas data.
+
+// See #SpriteAtlasData type for format spec
+loadSpriteAtlas("sprites/dungeon.png", {
+    "hero": {
+        x: 128,
+        y: 68,
+        width: 144,
+        height: 28,
+        sliceX: 9,
+        anims: {
+            idle: { from: 0, to: 3 },
+            run: { from: 4, to: 7 },
+            hit: 8,
+        },
+    },
+});
+
+const player = add([
+    sprite("hero"),
+]);
+
+player.play("run");
+returnsThe asset data.
+
+sincev2000.0
+
+loadSpriteAtlas(src: LoadSpriteSrc, url: string): Asset<Record>
+Load sprites from a sprite atlas with URL.
+
+paramsrc- The image resource url.
+
+paramurl- The json resource url.
+
+// Load from json file, see #SpriteAtlasData type for format spec
+loadSpriteAtlas("sprites/dungeon.png", "sprites/dungeon.json")
+
+const player = add([
+    sprite("hero"),
+])
+
+player.play("run")
+returnsThe asset data.
+
+sincev2000.0
+
+loadAseprite(name: string | null, imgSrc: LoadSpriteSrc, jsonSrc: string | AsepriteData): Asset<SpriteData>
+Load a sprite with aseprite spritesheet json (should use "array" in the export options).
+
+paramname- The asset name.
+
+paramimgSrc- The image resource url.
+
+loadAseprite("car", "sprites/car.png", "sprites/car.json")
+returnsThe asset data.
+
+sincev2000.0
+
+loadPedit(name: string | null, src: string): Asset<SpriteData>
+paramname- The asset name.
+
+paramsrc- The resource url. Load .pedit file.
+
+deprecatedThe format is not supported anymore.
+
+returnsThe asset data.
+
+sincev2000.0
+
+loadBean(name?: string): Asset<SpriteData>
+Load default sprite "bean".
+
+paramname- The optional name for bean.
+
+loadBean();
+
+// use it right away
+add([
+    sprite("bean"),
+]);
+returnsThe asset data.
+
+sincev2000.0
+
+loadJSON(name: string | null, url: string): Asset<any>
+Load custom JSON data from url.
+
+paramname- The asset name.
+
+paramurl- The resource url.
+
+returnsThe asset data.
+
+sincev3000.0
+
+loadSound(name: string | null, src: string | ArrayBuffer | AudioBuffer): Asset<SoundData>
+Load a sound into asset manager, with name and resource url. Supported formats: mp3, ogg, wav.
+
+paramname- The asset name.
+
+paramsrc- The resource url.
+
+loadSound("shoot", "/sounds/horse.ogg");
+loadSound("shoot", "/sounds/squeeze.mp3");
+loadSound("shoot", "/sounds/shoot.wav");
+returnsThe asset data.
+
+sincev2000.0
+
+loadMusic(name: string | null, url: string): void
+Like loadSound(), but the audio is streamed and won't block loading. Use this for big audio files like background music.
+
+paramname- The asset name.
+
+paramurl- The resource url.
+
+loadMusic("shoot", "/music/bossfight.mp3");
+returnsThe asset data.
+
+sincev3001.0
+
+loadFont(name: string, src: string | BinaryData, opt?: LoadFontOpt): Asset<FontData>
+Load a font (any format supported by the browser, e.g. ttf, otf, woff).
+
+paramname- The asset name.
+
+// load a font from a .ttf file
+loadFont("frogblock", "fonts/frogblock.ttf");
+returnsThe asset data.
+
+sincev3000.0
+
+loadBitmapFont(name: string | null, src: string, gridW: number, gridH: number, opt?: LoadBitmapFontOpt): Asset<BitmapFontData>
+Load a bitmap font into asset manager, with name and resource url and information on the layout of the bitmap.
+
+paramname- The asset name.
+
+paramsrc- The resource url.
+
+paramgridW- The width of each character on the bitmap.
+
+paramgridH- The height of each character on the bitmap.
+
+paramopt- The options for the bitmap font.
+
+// load a bitmap font called "04b03", with bitmap "fonts/04b03.png"
+// each character on bitmap has a size of (6, 8), and contains default ASCII_CHARS
+loadBitmapFont("04b03", "fonts/04b03.png", 6, 8);
+
+// load a font with custom characters
+loadBitmapFont("myfont", "myfont.png", 6, 8, { chars: "☺☻♥♦♣♠" });
+returnsThe asset data.
+
+sincev3000.0
+
+loadShader(name: string | null, vert?: string | null, frag?: string | null): Asset<ShaderData>
+Load a shader with vertex and fragment code.
+
+paramname- The asset name.
+
+paramvert- The vertex shader code. Null if not needed.
+
+paramfrag- The fragment shader code. Null if not needed.
+
+// default shaders and custom shader format
+loadShader("outline",
+`vec4 vert(vec2 pos, vec2 uv, vec4 color) {
+    // predefined functions to get the default value by KAPLAY
+    return def_vert();
+}`,
+`vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+    // turn everything blue-ish
+    return def_frag() * vec4(0, 0, 1, 1);
+}`, false)
+returnsThe asset data.
+
+sincev2000.0
+
+loadShaderURL(name: string | null, vert?: string | null, frag?: string | null): Asset<ShaderData>
+Load a shader with vertex and fragment code file url.
+
+paramname- The name of the asset.
+
+paramvert- The vertex shader code. Null if not needed.
+
+paramfrag- The fragment shader code. Null if not needed.
+
+// load only a fragment shader from URL
+loadShaderURL("outline", null, "/shaders/outline.glsl")
+retunrsThe asset data.
+
+sincev3000.0
+
+load<T>(l: Promise): Asset<T>
+Add a new loader to wait for before starting the game.
+
+paraml- The loader to wait for.
+
+load(new Promise((resolve, reject) => {
+    // anything you want to do that stalls the game in loading state
+    resolve("ok")
+}))
+returnsThe asset data.
+
+sincev3000.0
+
+loadProgress(): number
+Get the global asset loading progress (0.0 - 1.0).
+
+returnsThe loading progress.
+
+sincev3000.0
+
+getSprite(name: string): Asset | null
+Get SpriteData from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+getSound(name: string): Asset | null
+Get SoundData from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+getFont(name: string): Asset | null
+Get FontData from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+getBitmapFont(name: string): Asset | null
+Get BitmapFontData from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+getShader(name: string): Asset | null
+Get ShaderData from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+getAsset(name: string): Asset | null
+Get custom data from name.
+
+paramname- The asset name.
+
+returnsThe asset data.
+
+sincev3000.0
+
+Asset<D>:
+An asset is a resource that is loaded asynchronously.
+
+loaded: boolean
+loaded<D>(data: D): Asset<D>
+data: D | null
+error: Error | null
+onLoadEvents:
+onErrorEvents:
+onFinishEvents:
+onLoad(action: (data: D)=>void): this
+onError(action: (err: Error)=>void): this
+onFinish(action: ()=>void): this
+then(action: (data: D)=>void): Asset<D>
+catch(action: (err: Error)=>void): Asset<D>
+finally(action: ()=>void): Asset<D>
+SpriteData:
+tex: Texture
+frames: Quad[]
+anims: SpriteAnims
+slice9: NineSlice | null
+width(): number
+sincev3001.0
+
+height(): number
+from(src: LoadSpriteSrc, opt?: LoadSpriteOpt): Promise<SpriteData>
+fromImage(data: ImageSource, opt?: LoadSpriteOpt): SpriteData
+fromURL(url: string, opt?: LoadSpriteOpt): Promise<SpriteData>
+SoundData:
+buf: AudioBuffer
+fromArrayBuffer(buf: ArrayBuffer): Promise<SoundData>
+fromURL(url: string): Promise<SoundData>
+add<T>(comps?: CompList | GameObj): GameObj<T>
+Assemble a game object from a list of components, and add it to the game,
+
+paramcomps- List of components to add to the game object, or a game object made with
+
+const player = add([
+    // List of components, each offers a set of functionalities
+    sprite("mark"),
+    pos(100, 200),
+    area(),
+    body(),
+    health(8),
+    // Plain strings are tags, a quicker way to let us define behaviors for a group
+    "player",
+    "friendly",
+    // Components are just plain objects, you can pass an object literal as a component.
+    {
+        dir: LEFT,
+        dead: false,
+        speed: 240,
+    },
+]);
+
+// .jump is provided by body()
+player.jump();
+
+// .moveTo is provided by pos()
+player.moveTo(300, 200);
+
+// .onUpdate() is on every game object, it registers an event that runs every frame
+player.onUpdate(() => {
+    // .move() is provided by pos()
+    player.move(player.dir.scale(player.speed));
+});
+
+// .onCollide is provided by area()
+player.onCollide("tree", () => {
+    destroy(player);
+});
+returnsThe added game object that contains all properties and methods each component offers.
+
+make<T>(comps?: CompList): GameObj<T>
+Create a game object like add(), but not adding to the scene.
+
+paramcomps- List of components to add to the game object.
+
+const label = make([
+    rect(100, 20),
+]);
+
+// Add a new text to the label
+label.add([
+    text("Hello, world!"),
+]);
+
+// Add game object to the scene
+// Now it will render
+add(label);
+returnsThe created game object that contains all properties and methods each component offers.
+
+sincev3000.1
+
+readd(obj: GameObj): GameObj
+Remove and re-add the game obj, without triggering add / destroy events.
+
+paramobj- The game object to re-add.
+
+// Common way to use this is to have one sprite overlap another sprite, and use readd() to have the bottom sprite on top of the other.
+
+// Create two sprites.
+const greenBean = add([
+    sprite("bean"),
+    pos(200,140),
+    color(255, 255, 255),
+    area(),
+]);
+
+// This bean will overlap the green bean.
+const purpleBean = add([
+    sprite("bean"),
+    pos(230,140),
+    color(255, 0, 255),
+    area(),
+]);
+
+// Example 1: simply call readd() on the target you want on top.
+readd(greenBean);
+
+// Example 2: using onClick() or other functions with readd().
+// If you comment out the first example, and use this readd() with a function like onClick(), you
+can keep switching which sprite is above the other ( click on edge of face ).
+
+purpleBean.onClick(() => {
+    readd(greenBean);
+});
+
+greenBean.onClick(() => {
+    readd(purpleBean);
+});
+returnsThe re-added game object.
+
+sincev3001.0
+
+get(tag: Tag | Tag[], opts?: GetOpt): GameObj[]
+Get a list of all game objs with certain tag.
+
+paramtag- The tag to search for. Use "*" to get all objects.
+
+paramopts- Additional options.
+
+// get a list of all game objs with tag "bomb"
+const allBombs = get("bomb");
+
+// To get all objects use "*"
+const allObjs = get("*");
+
+// Recursively get all children and descendents
+const allObjs = get("*", { recursive: true });
+returnsA list of game objects that have the tag.
+
+sincev2000.0
+
+query(opt: QueryOpt): GameObj[]
+Get a list of game objects in an advanced way.
+
+paramopt- The query options.
+
+const bean = k.add(["friend", "bean"]);
+const bean2 = k.add(["friend", "bean"]);
+const bag = k.add(["friend", "bag"]);
+
+// get bean
+query({
+    include: "bean",
+}) // will return [bean, bean2];
+
+// get all friends excluding bean
+query({
+    include: "friend",
+    exclude: "bean",
+}); // will return [bag]
+
+destroy(obj: GameObj): void
+Remove the game obj.
+
+paramobj- The game object to remove.
+
+// every time bean collides with anything with tag "fruit", remove it
+bean.onCollide("fruit", (fruit) => {
+    destroy(fruit);
+});
+destroyAll(tag: Tag): void
+Remove all game objs with certain tag.
+
+paramtag- The tag to search for.
+
+// destroy all objects with tag "bomb" when you click one
+onClick("bomb", () => {
+    destroyAll("bomb");
+});
+GameObjRaw:
+Base interface of all game objects.
+
+sincev2000.0
+
+add<T>(comps?: CompList | GameObj): GameObj<T>
+Add a child.
+
+paramcomps- The components to add.
+
+returnsThe added game object.
+
+sincev3000.0
+
+readd<T>(obj: GameObj): GameObj<T>
+Remove and re-add the game obj, without triggering add / destroy events.
+
+paramobj- The game object to re-add.
+
+returnsThe re-added game object.
+
+sincev3000.0
+
+remove(obj: GameObj): void
+Remove a child.
+
+paramobj- The game object to remove.
+
+sincev3000.0
+
+removeAll(tag: Tag): void
+Remove all children with a certain tag.
+
+paramtag- The tag to remove.
+
+sincev3000.0
+
+removeAll(): void
+Remove all children.
+
+sincev3000.0
+
+get(tag: Tag | Tag[], opts?: GetOpt): GameObj[]
+Get a list of all game objs with certain tag.
+
+paramtag- The tag to get.
+
+sincev3000.0
+
+query(opt: QueryOpt): GameObj[]
+Get a list of all game objs with certain properties.
+
+paramopt- The properties to get.
+
+sincev3001.0
+
+children: GameObj[]
+readonlyGet all children game objects.
+
+sincev3000.0
+
+tags: string[]
+readonlyGet the tags of a game object. For update it, use `tag()` and `untag()`.
+
+sincev3001.0
+
+fixedUpdate(): void
+Update this game object and all children game objects.
+
+sincev3001.0
+
+update(): void
+Update this game object and all children game objects.
+
+sincev3000.0
+
+draw(): void
+Draw this game object and all children game objects.
+
+sincev3000.0
+
+drawInspect(): void
+Draw debug info in inspect mode
+
+sincev3000.0
+
+clearEvents(): void
+use(comp: Comp | Tag): void
+Add a component.
+
+const obj = add([
+   sprite("bean"),
+]);
+
+// Add opacity
+obj.use(opacity(0.5));
+sincev2000.0
+
+unuse(comp: Tag): void
+Remove a component with its id (the component name)
+
+paramcomp- The component id to remove. It means the name, if sprite, then it's "sprite".
+
+// Remove sprite component
+obj.unuse("sprite");
+sincev2000.0
+
+has(compId: string | string[], op?: and | or): boolean
+Check if game object has a certain component.
+
+paramcompId- The component id(s) to check.
+
+paramop- The operator to use when searching for multiple components. Default is "and".
+
+// Check if game object has sprite component
+if(obj.has("sprite")) {
+    debug.log("has sprite component");
+}
+
+// Check if game object has tags
+obj.has(["tag1", "tag2"]); // AND, it has both tags
+obj.has(["tag1", "tag2"], "or"); // OR, it has either tag1 or tag2
+returnstrue if has the component(s), false otherwise.
+
+sincev3001.0.5
+
+experimentalThis feature is in experimental phase, it will be fully released in v3001.1.0
+
+tag(tag: Tag | Tag[]): void
+Add a tag(s) to the game obj.
+
+paramtag- The tag(s) to add.
+
+// add enemy tag
+obj.tag("enemy");
+
+// add multiple tags
+obj.tag(["enemy", "boss"]);
+sincev3001.0.5
+
+experimentalThis feature is in experimental phase, it will be fully released in v3001.1.0
+
+untag(tag: Tag | Tag[]): void
+Remove a tag(s) from the game obj.
+
+paramtag- The tag(s) to remove.
+
+// remove enemy tag
+obj.untag("enemy");
+
+// remove multiple tags
+obj.untag(["enemy", "boss"]);
+sincev3001.0.5
+
+experimentalThis feature is in experimental phase, it will be fully released in v3001.1.0
+
+is(tag: Tag | Tag[], op?: and | or): boolean
+If there's certain tag(s) on the game obj.
+
+paramtag- The tag(s) for checking.
+
+paramop- The operator to use when searching for multiple tags. Default is "and".
+
+sincev3001.0.5
+
+experimentalThis feature is in experimental phase, it will be fully released in v3001.1.0
+
+on(event: string, action: (args: any)=>void): KEventController
+Register an event.
+
+paramevent- The event name.
+
+paramaction- The action to run when event is triggered.
+
+returnsThe event controller.
+
+sincev2000.0
+
+trigger(event: string, args: any): void
+Trigger an event.
+
+paramevent- The event name.
+
+parmargs - The arguments to pass to the event action.
+
+sincev2000.0
+
+destroy(): void
+Remove the game obj from scene.
+
+sincev2000.0
+
+c(id: string): Comp | null
+Get state for a specific comp.
+
+paramid- The component id.
+
+sincev2000.0
+
+inspect(): GameObjInspect
+Gather debug info of all comps.
+
+sincev2000.0
+
+onAdd(action: ()=>void): KEventController
+Register an event that runs when the game obj is added to the scene.
+
+returnsThe event controller.
+
+sincev2000.0
+
+onUpdate(action: ()=>void): KEventController
+Register an event that runs every frame as long as the game obj exists.
+
+returnsThe event controller.
+
+sincev2000.1
+
+onDraw(action: ()=>void): KEventController
+Register an event that runs every frame as long as the game obj exists (this is the same as `onUpdate()`, but all draw events are run after all update events).
+
+returnsThe event controller.
+
+sincev2000.1
+
+onDestroy(action: ()=>void): KEventController
+Register an event that runs when the game obj is destroyed.
+
+returnsThe event controller.
+
+sincev2000.1
+
+onUse(action: (id: string)=>void): KEventController
+Register an event that runs when a component is used.
+
+returnsThe event controller.
+
+sincev3001.0
+
+onUnuse(action: (id: string)=>void): KEventController
+Register an event that runs when a component is unused.
+
+returnsThe event controller.
+
+sincev3001.0
+
+exists(): boolean
+If game obj is attached to the scene graph.
+
+returnstrue if attached, false otherwise.
+
+sincev2000.0
+
+isAncestorOf(obj: GameObj): boolean
+Check if is an ancestor (recursive parent) of another game object
+
+returnstrue if is ancestor, false otherwise.
+
+sincev3000.0
+
+transform: Mat4
+Calculated transform matrix of a game object.
+
+sincev3000.0
+
+hidden: boolean
+If draw the game obj (run "draw" event or not).
+
+sincev2000.0
+
+paused: boolean
+If update the game obj (run "update" event or not).
+
+sincev2000.0
+
+id: GameObjID | null
+A unique number ID for each game object.
+
+sincev2000.0
+
+canvas: FrameBuffer | null
+The canvas to draw this game object on
+
+sincev3001.0
+
+onKeyDown: KAPLAYCtx[onKeyDown]
+onKeyPress: KAPLAYCtx[onKeyPress]
+onKeyPressRepeat: KAPLAYCtx[onKeyPressRepeat]
+onKeyRelease: KAPLAYCtx[onKeyRelease]
+onCharInput: KAPLAYCtx[onCharInput]
+onMouseDown: KAPLAYCtx[onMouseDown]
+onMousePress: KAPLAYCtx[onMousePress]
+onMouseRelease: KAPLAYCtx[onMouseRelease]
+onMouseMove: KAPLAYCtx[onMouseMove]
+onTouchStart: KAPLAYCtx[onTouchStart]
+onTouchMove: KAPLAYCtx[onTouchMove]
+onTouchEnd: KAPLAYCtx[onTouchEnd]
+onScroll: KAPLAYCtx[onScroll]
+onGamepadButtonDown: KAPLAYCtx[onGamepadButtonDown]
+onGamepadButtonPress: KAPLAYCtx[onGamepadButtonPress]
+onGamepadButtonRelease: KAPLAYCtx[onGamepadButtonRelease]
+onGamepadStick: KAPLAYCtx[onGamepadStick]
+onButtonDown: KAPLAYCtx[onButtonDown]
+onButtonPress: KAPLAYCtx[onButtonPress]
+onButtonRelease: KAPLAYCtx[onButtonRelease]
+GameObj<T>: GameObjRaw & MergeComps
+The basic unit of object in KAPLAY. The player, a butterfly, a tree, or even a piece of text.
+
+GameObjID: number
+pos(x: number, y: number): PosComp
+Set the position of a Game Object.
+
+paramx- The x position to set.
+
+paramy- The y position to set.
+
+// This game object will draw a "bean" sprite at (100, 200)
+add([
+    pos(100, 200),
+    sprite("bean"),
+]);
+returnsThe position comp.
+
+sincev2000.0
+
+pos(xy: number): PosComp
+pos(p: Vec2): PosComp
+pos(): PosComp
+scale(x: number, y: number): ScaleComp
+Set the scale of a Game Object.
+
+paramx- The x scale to set.
+
+paramy- The y scale to set.
+
+// scale uniformly with one value
+add([
+    sprite("bean"),
+	   scale(3),
+]);
+
+// scale with x & y values. In this case, scales more horizontally.
+add([
+    sprite("bean"),
+	   scale(3, 1),
+]);
+
+ // scale with vec2(x,y).
+bean.scale = vec2(2,4);
+
+returnsThe scale comp.
+
+sincev2000.0
+
+scale(xy: number): ScaleComp
+scale(s: Vec2): ScaleComp
+scale(): ScaleComp
+rotate(a?: number): RotateComp
+Rotates a Game Object (in degrees).
+
+parama- The angle to rotate by. Defaults to 0.
+
+let bean = add([
+    sprite("bean"),
+    rotate(),
+])
+
+// bean will be upside down!
+bean.angle = 180
+returnsThe rotate comp.
+
+sincev2000.0
+
+color(r: number, g: number, b: number): ColorComp
+Sets the color of a Game Object (rgb 0-255).
+
+paramr- The red value to set.
+
+paramg- The green value to set.
+
+paramb- The blue value to set.
+
+// blue frog
+add([
+    sprite("bean"),
+    color(0, 0, 255),
+]);
+returnsThe color comp.
+
+sincev2000.0
+
+color(c: Color): ColorComp
+color(rgb: [number, number, number]): ColorComp
+color(c: string): ColorComp
+color(): ColorComp
+opacity(o?: number): OpacityComp
+Sets the opacity of a Game Object (0.0 - 1.0).
+
+paramo- The opacity value to set.
+
+const bean = add([
+    sprite("bean"),
+    opacity(0.5) // Make bean 50% transparent
+])
+
+// Make bean invisible
+bean.opacity = 0
+
+// Make bean fully visible
+bean.opacity = 1
+returnsThe opacity comp.
+
+sincev2000.0
+
+sprite(spr: string | SpriteData | Asset, opt?: SpriteCompOpt): SpriteComp
+Attach and render a sprite to a Game Object.
+
+paramspr- The sprite to render.
+
+paramopt- Options for the sprite component. See
+
+// minimal setup
+add([
+    sprite("bean"),
+])
+
+// with options
+const bean = add([
+    sprite("bean", {
+        // start with animation "idle"
+        anim: "idle",
+    }),
+])
+
+// play / stop an anim
+bean.play("jump")
+bean.stop()
+
+// manually setting a frame
+bean.frame = 3
+returnsThe sprite comp.
+
+sincev2000.0
+
+text(txt?: string, opt?: TextCompOpt): TextComp
+Attach and render a text to a Game Object.
+
+paramtxt- The text to display.
+
+paramopt- Options for the text component. See
+
+// a simple score counter
+const score = add([
+    text("Score: 0"),
+    pos(24, 24),
+    { value: 0 },
+])
+
+player.onCollide("coin", () => {
+    score.value += 1
+    score.text = "Score:" + score.value
+})
+
+// with options
+add([
+    pos(24, 24),
+    text("ohhi", {
+        size: 48, // 48 pixels tall
+        width: 320, // it'll wrap to next line when width exceeds this value
+        font: "sans-serif", // specify any font you loaded or browser built-in
+    }),
+])
+returnsThe text comp.
+
+sincev2000.0
+
+polygon(pts: Vec2[], opt?: PolygonCompOpt): PolygonComp
+Attach and render a polygon to a Game Object.
+
+parampts- The points to render the polygon.
+
+paramopt- Options for the polygon component. See
+
+// Make a square the hard way
+add([
+    pos(80, 120),
+    polygon([vec2(0,0), vec2(50,0), vec2(50,50), vec2(0,50)]),
+    outline(4),
+    area(),
+])
+returnsThe polygon comp.
+
+sincev3001.0
+
+rect(w: number, h: number, opt?: RectCompOpt): RectComp
+Attach and render a rectangle to a Game Object.
+
+paramw- The width of the rectangle.
+
+paramh- The height of the rectangle.
+
+paramopt- Options for the rectangle component. See
+
+const obstacle = add([
+    pos(80, 120),
+    rect(20, 40),
+    outline(4),
+    area(),
+])
+returnsThe rectangle component.
+
+circle(radius: number, opt?: CircleCompOpt): CircleComp
+Attach and render a circle to a Game Object.
+
+paramradius- The radius of the circle.
+
+paramopt- Options for the circle component. See
+
+add([
+    pos(80, 120),
+    circle(16),
+])
+returnsThe circle comp.
+
+sincev2000.0
+
+uvquad(w: number, h: number): UVQuadComp
+Attach and render a UV quad to a Game Object.
+
+paramw- The width of the quad.
+
+paramh- The height of the quad.
+
+add([
+    uvquad(width(), height()),
+    shader("spiral"),
+])
+returnsThe UV quad comp.
+
+sincev2000.0
+
+area(opt?: AreaCompOpt): AreaComp
+Attach a collider area from shape and enables collision detection in a Game Object.
+
+paramopt- Options for the area component. See
+
+// Automatically generate area information from the shape of render
+const player = add([
+    sprite("bean"),
+    area(),
+])
+
+// Die if player collides with another game obj with tag "tree"
+player.onCollide("tree", () => {
+    destroy(player)
+    go("lose")
+})
+
+// Check for collision manually every frame instead of registering an event
+player.onUpdate(() => {
+    if (player.isColliding(bomb)) {
+        score += 1
+    }
+})
+returnsThe area comp.
+
+sincev2000.0
+
+anchor(o: Anchor | Vec2): AnchorComp
+Anchor point for render (default "topleft").
+
+paramo- The anchor point to set.
+
+// set anchor to "center" so it'll rotate from center
+add([
+    rect(40, 10),
+    rotate(45),
+    anchor("center"),
+])
+returnsThe anchor comp.
+
+sincev2000.0
+
+z(z: number): ZComp
+Determines the draw order for objects on the same layer. Object will be drawn on top if z value is bigger.
+
+paramz- The z value to set.
+
+const bean = add([
+   sprite("bean"),
+   pos(100, 100),
+   z(10), // Bean has a z value of 10
+])
+
+// Mark has a z value of 20, so he will always be drawn on top of bean
+const mark = add([
+  sprite("mark"),
+  pos(100, 100),
+  z(20),
+])
+
+bean.z = 30 // Bean now has a higher z value, so it will be drawn on top of mark
+returnsThe z comp.
+
+sincev2000.0
+
+outline(width?: number, color?: Color, opacity?: number, join?: LineJoin, miterLimit?: number, cap?: LineCap): OutlineComp
+Give an object an outline. Doesn't support sprite or text components.
+
+paramwidth- The width of the outline.
+
+paramcolor- The color of the outline.
+
+paramopacity- The opacity of the outline.
+
+paramjoin- -The line join style.
+
+parammiterLimit- The miter limit ratio.
+
+paramcap-The line cap style.
+
+// Add an outline to a rectangle
+
+add([
+   rect(40, 40),
+   outline(4),
+]);
+returnsThe outline comp.
+
+sincev2000.0
+
+particles(popt: ParticlesOpt, eopt: EmitterOpt): ParticlesComp
+Attach a particle emitter to a Game Object.
+
+parampopt- The options for the particles.
+
+parameopt- The options for the emitter.
+
+// beansplosion
+
+// create the emitter
+const emitter = add([
+    pos(center()),
+    particles({
+        max: 100,
+        speed: [75, 100],
+        lifeTime: [0.75,1.0],
+        angle: [0, 360],
+        opacities: [1.0, 0.0],
+        texture: getSprite("bean").tex,   // texture of a sprite
+        quads: getSprite("bean").frames,  // frames of a sprite
+    }, {
+        direction: 0,
+        spread: 360,
+    }),
+])
+
+onUpdate(() => {
+    emitter.emit(1)
+})
+returnsThe particles comp.
+
+sincev3001.0
+
+body(opt?: BodyCompOpt): BodyComp
+Physical body that responds to gravity. Requires "area" and "pos" comp. This also makes the object "solid".
+
+paramopt- Options for the body component. See
+
+// bean jumpy
+const bean = add([
+    sprite("bean"),
+    // body() requires "pos" and "area" component
+    pos(),
+    area(),
+    body(),
+])
+
+// when bean is grounded, press space to jump
+// check out #BodyComp for more methods
+onKeyPress("space", () => {
+    if (bean.isGrounded()) {
+        bean.jump()
+    }
+})
+
+// run something when bean falls and hits a ground
+bean.onGround(() => {
+    debug.log("oh no!")
+})
+returnsThe body comp.
+
+sincev2000.0
+
+surfaceEffector(opt: SurfaceEffectorCompOpt): SurfaceEffectorComp
+Applies a force on a colliding object in order to make it move along the collision tangent vector. Good for conveyor belts.
+
+paramopt- Options for the surface effector component. See
+
+loadSprite("belt", "/sprites/jumpy.png")
+
+// conveyor belt
+add([
+    pos(center()),
+    sprite("belt"),
+    rotate(90),
+    area(),
+    body({ isStatic: true }),
+    surfaceEffector({
+        speed: 50,
+    })
+])
+returnsThe surface effector comp.
+
+sincev3001.0
+
+areaEffector(opt: AreaEffectorCompOpt): AreaEffectorComp
+Applies a force on a colliding object. Good to apply anti-gravity, wind or water flow.
+
+paramopt- Options for the area effector component. See
+
+returnsThe area effector comp.
+
+sincev3001.0
+
+pointEffector(opt: PointEffectorCompOpt): PointEffectorComp
+Applies a force on a colliding object directed towards this object's origin. Good to apply magnetic attraction or repulsion.
+
+paramopt- Options for the point effector component. See
+
+returnsThe point effector comp.
+
+sincev3001.0
+
+platformEffector(opt?: PlatformEffectorCompOpt): PlatformEffectorComp
+The platform effector makes it easier to implement one way platforms or walls. This effector is typically used with a static body, and it will only be solid depending on the direction the object is traveling from.
+
+paramopt- Options for the platform effector component. See
+
+returnsThe platform effector comp.
+
+sincev3001.0
+
+buoyancyEffector(opt: BuoyancyEffectorCompOpt): BuoyancyEffectorComp
+Applies an upwards force (force against gravity) to colliding objects depending on the fluid density and submerged area. Good to apply constant thrust.
+
+paramopt- Options for the buoyancy effector component. See
+
+returnsThe buoyancy effector comp.
+
+sincev3001.0
+
+constantForce(opt: ConstantForceCompOpt): ConstantForceComp
+Applies a constant force to the object. Good to apply constant thrust.
+
+paramopt- Options for the constant force component. See
+
+returnsThe constant force comp.
+
+sincev3001.0
+
+doubleJump(numJumps?: number): DoubleJumpComp
+Enables double jump.
+
+paramnumJumps- The number of jumps allowed. Defaults to 1.
+
+requires
+
+returnsThe double jump comp.
+
+sincev3000.0
+
+move(dir: number | Vec2, speed: number): EmptyComp
+Move towards a direction infinitely, and destroys when it leaves game view.
+
+paramdir- The direction to move towards.
+
+paramspeed- The speed to move at.
+
+requires
+
+// enemy throwing feces at player
+const projectile = add([
+    sprite("feces"),
+    pos(enemy.pos),
+    area(),
+    move(player.pos.angle(enemy.pos), 1200),
+    offscreen({ destroy: true }),
+])
+returnsThe move comp.
+
+sincev2000.0
+
+offscreen(opt?: OffScreenCompOpt): OffScreenComp
+Control the behavior of object when it goes out of view.
+
+paramopt- Options for the offscreen component. See
+
+add([
+    pos(player.pos),
+    sprite("bullet"),
+    offscreen({ destroy: true }),
+    "projectile",
+]);
+returnsThe offscreen comp.
+
+sincev2000.2
+
+follow(obj: GameObj | null, offset?: Vec2): FollowComp
+Follow another game obj's position.
+
+paramobj- The game obj to follow.
+
+paramoffset- The offset to follow at.
+
+const bean = add(...)
+
+add([
+    sprite("bag"),
+    pos(),
+    follow(bean) // Follow bean's position
+]);
+
+// Using offset
+const target = add(...)
+
+const mark = add([
+  sprite("mark"),
+  pos(),
+  follow(target, vec2(32, 32)) // Follow target's position with an offset
+])
+
+mark.follow.offset = vec2(64, 64) // Change the offset
+returnsThe follow comp.
+
+sincev2000.0
+
+shader(id: string, uniform?: Uniform | ()=>Uniform): ShaderComp
+Custom shader.
+
+paramid- The shader id.
+
+paramuniform- The uniform to pass to the shader.
+
+returnsThe shader comp.
+
+sincev2000.0
+
+textInput(hasFocus?: boolean, maxInputLength?: number): TextInputComp
+Get input from the user and store it in the nodes text property, displaying it with the text component and allowing other functions to access it.
+
+paramhasFocus- Whether the text input should have focus.
+
+parammaxInputLength- The maximum length of the input.
+
+const obj = add([
+    text(""),
+    textInput(),
+])
+
+obj.hasFocus = false
+debug.log(obj.text) // oh no i cant see my new text since it was disabled
+returnsThe text input comp.
+
+sincev3001.0
+
+timer(maxLoopsPerFrame?: number): TimerComp
+Enable timer related functions like wait(), loop(), tween() on the game object.
+
+parammaxLoopsPerFrame- The maximum number of loops per frame.
+
+const obj = add([
+    timer(),
+])
+
+obj.wait(2, () => { ... })
+obj.loop(0.5, () => { ... })
+obj.tween(obj.pos, mousePos(), 0.5, (p) => obj.pos = p, easings.easeOutElastic)
+returnsThe timer comp.
+
+sincev2000.0
+
+fixed(): FixedComp
+Make a game obj unaffected by camera or parent object transforms, and render at last. Useful for UI elements.
+
+// this will be be fixed on top left and not affected by camera
+const score = add([
+    text(0),
+    pos(12, 12),
+    fixed(),
+])
+returnsThe fixed comp.
+
+sincev2000.0
+
+stay(scenesToStay?: string[]): StayComp
+Don't get destroyed on scene switch. Only works in objects attached to root.
+
+paramscenesToStay- The scenes to stay in. By default it stays in all scenes.
+
+player.onCollide("bomb", () => {
+    // spawn an explosion and switch scene, but don't destroy the explosion game obj on scene switch
+    add([
+        sprite("explosion", { anim: "burst", }),
+        stay(),
+        lifespan(1),
+    ])
+    go("lose", score)
+})
+returnsThe stay comp.
+
+sincev2000.0
+
+health(hp: number, maxHP?: number): HealthComp
+Handles health related logic and events.
+
+paramhp- The initial health points.
+
+parammaxHP- The maximum health points.
+
+const player = add([
+    health(3),
+])
+
+player.onCollide("bad", (bad) => {
+    player.hurt(1)
+    bad.hurt(1)
+})
+
+player.onCollide("apple", () => {
+    player.heal(1)
+})
+
+player.on("hurt", () => {
+    play("ouch")
+})
+
+// triggers when hp reaches 0
+player.on("death", () => {
+    destroy(player)
+    go("lose")
+})
+returnsThe health comp.
+
+sincev2000.0
+
+lifespan(time: number, options?: LifespanCompOpt): EmptyComp
+Destroy the game obj after certain amount of time
+
+paramtime- The time to live.
+
+paramoptions- Options for the lifespan component. See
+
+// spawn an explosion, destroy after 1 seconds, start fading away after 0.5 second
+add([
+    sprite("explosion", { anim: "burst", }),
+    lifespan(1, { fade: 0.5 }),
+])
+returnsThe lifespan comp.
+
+sincev2000.0
+
+named(name: string): NamedComp
+Names an game obj.
+
+paramname- The name to set.
+
+returnsThe named comp.
+
+sincev3001.0
+
+state(initialState: string, stateList?: string[]): StateComp
+Finite state machine.
+
+paraminitialState- The initial state.
+
+paramstateList- The list of states.
+
+const enemy = add([
+    pos(80, 100),
+    sprite("robot"),
+    state("idle", ["idle", "attack", "move"]),
+])
+
+// this callback will run once when enters "attack" state
+enemy.onStateEnter("attack", () => {
+    // enter "idle" state when the attack animation ends
+    enemy.play("attackAnim", {
+        // any additional arguments will be passed into the onStateEnter() callback
+        onEnd: () => enemy.enterState("idle", rand(1, 3)),
+    })
+    checkHit(enemy, player)
+})
+
+// this will run once when enters "idle" state
+enemy.onStateEnter("idle", (time) => {
+    enemy.play("idleAnim")
+    wait(time, () => enemy.enterState("move"))
+})
+
+// this will run every frame when current state is "move"
+enemy.onStateUpdate("move", () => {
+    enemy.follow(player)
+    if (enemy.pos.dist(player.pos) < 16) {
+        enemy.enterState("attack")
+    }
+})
+returnsThe state comp.
+
+sincev2000.1
+
+state(initialState: string, stateList: string[], transitions: Record): StateComp
+state() with pre-defined transitions.
+
+paraminitialState- The initial state.
+
+paramstateList- The list of states.
+
+paramtransitions- The transitions between states.
+
+const enemy = add([
+    pos(80, 100),
+    sprite("robot"),
+    state("idle", ["idle", "attack", "move"], {
+        "idle": "attack",
+        "attack": "move",
+        "move": [ "idle", "attack" ],
+    }),
+])
+
+// this callback will only run once when enter "attack" state from "idle"
+enemy.onStateTransition("idle", "attack", () => {
+    checkHit(enemy, player)
+})
+returnsThe state comp.
+
+sincev2000.2
+
+fadeIn(time: number): Comp
+deprecatedsince v3001.0
+
+requires
+
+returnsAn empty comp.
+
+sincev3000.0
+
+mask(maskType?: Mask): MaskComp
+Mask all children object render.
+
+parammaskType- The type of mask to use.
+
+returnsThe mask comp.
+
+sincev3001.0
+
+drawon(canvas: FrameBuffer): Comp
+Specifies the FrameBuffer the object should be drawn on.
+
+paramcanvas- The FrameBuffer to draw on.
+
+// Draw on another canvas
+let canvas = makeCanvas(width(), height());
+
+let beanOnCanvas = add([
+    sprite("bean"),
+    drawon(canvas.fb),
+]);
+returnsThe drawon comp.
+
+sincev3000.0
+
+tile(opt?: TileCompOpt): TileComp
+A tile on a tile map.
+
+paramopt- Options for the tile component. See
+
+returnsThe tile comp.
+
+sincev3000.0
+
+agent(opt?: AgentCompOpt): AgentComp
+An agent which can finds it way on a tilemap.
+
+paramopt- Options for the agent component. See
+
+returnsThe agent comp.
+
+sincev3000.0
+
+animate(opt?: AnimateCompOpt): AnimateComp
+A component to animate properties.
+
+paramopt- Options for the animate component. See
+
+let movingBean = add([
+      sprite("bean"),
+      pos(50, 150),
+      anchor("center"),
+      animate(),
+]);
+
+// Moving right to left using ping-pong
+movingBean.animate("pos", [vec2(50, 150), vec2(150, 150)], {
+    duration: 2,
+    direction: "ping-pong",
+});
+returnsThe animate comp.
+
+sincev3001.0
+
+serializeAnimation(obj: GameObj, name: string): Animation
+Serializes the animation to plain objects
+
+paramobj- The game obj to serialize.
+
+returnsThe serialized animation.
+
+sincev3001.0
+
+sentry(candidates: SentryCandidates, opt?: SentryCompOpt): SentryComp
+A sentry which reacts to objects coming into view.
+
+returnsThe sentry comp.
+
+sincev3001.0
+
+patrol(opts: PatrolCompOpt): PatrolComp
+A patrol which can follow waypoints to a goal.
+
+sincev3001.0
+
+pathfinder(opts: PathfinderCompOpt): PathfinderComp
+A navigator pathfinder which can calculate waypoints to a goal.
+
+sincev3001.0
+
+Comp:
+id?: Tag
+Component ID (if left out won't be treated as a comp).
+
+require?: Tag[]
+What other comps this comp depends on.
+
+add?(): void
+Event that runs when host game obj is added to scene.
+
+fixedUpdate?(): void
+Event that runs at a fixed frame rate.
+
+update?(): void
+Event that runs every frame.
+
+draw?(): void
+Event that runs every frame after update.
+
+destroy?(): void
+Event that runs when obj is removed from scene.
+
+inspect?(): string | null
+Debug info for inspect mode.
+
+drawInspect?(): void
+Draw debug info in inspect mode
+
+sincev3000.0
+
+CircleComp:
+The circle component.
+
+draw: Comp[draw]
+radius: number
+Radius of circle.
+
+renderArea(): Rect
+Render area of the circle.
+
+sincev3000.0
+
+CircleCompOpt:
+Options for the circle component.
+
+fill?: boolean
+If fill the circle (useful if you only want to render outline with outline component).
+
+ColorComp:
+The color component.
+
+color: Color
+MaskComp:
+The mask component.
+
+mask: Mask
+OpacityComp:
+The opacity component.
+
+opacity: number
+Opacity of the current object.
+
+fadeIn(time?: number, easeFunc?: EaseFunc): TweenController
+Fade in at the start.
+
+fadeOut(time?: number, easeFunc?: EaseFunc): TweenController
+Fade out at the start.
+
+OutlineComp:
+The outline component.
+
+outline: Outline
+ParticlesOpt:
+max: number
+lifeTime?: [number, number]
+speed?: [number, number]
+acceleration?: [Vec2, Vec2]
+damping?: [number, number]
+angle?: [number, number]
+angularVelocity?: [number, number]
+scales?: number[]
+colors?: Color[]
+opacities?: number[]
+quads?: Quad[]
+texture: Texture
+Options for the particles's component
+
+ParticlesComp:
+The particles component.
+
+emit(n: number): void
+onEnd(cb: ()=>void): void
+PolygonComp:
+The polygon component.
+
+sincev3001.0
+
+draw: Comp[draw]
+pts: Vec2[]
+Points in the polygon.
+
+radius?: number | number[]
+The radius of each corner.
+
+colors?: Color[]
+The color of each vertex.
+
+uv?: Vec2[]
+The uv of each vertex.
+
+sincev3001.0
+
+tex?: Texture
+The texture used when uv coordinates are present.
+
+sincev3001.0
+
+renderArea(): Polygon
+PolygonCompOpt: Omit<DrawPolygonOpt, pts>
+Options for the polygon component.
+
+RectComp:
+The rect component.
+
+draw: Comp[draw]
+width: number
+Width of rectangle.
+
+height: number
+Height of rectangle.
+
+radius?: number | [number, number, number, number]
+The radius of each corner.
+
+renderArea(): Rect
+sincev3000.0
+
+RectCompOpt:
+Options for the rect component.
+
+radius?: number | [number, number, number, number]
+Radius of the rectangle corners.
+
+fill?: boolean
+If fill the rectangle (useful if you only want to render outline with outline() component).
+
+ShaderComp:
+The shader component.
+
+uniform?: Uniform
+shader: string
+SpriteComp:
+The sprite component.
+
+draw: Comp[draw]
+sprite: string
+Name of the sprite.
+
+width: number
+Width for sprite.
+
+height: number
+Height for sprite.
+
+frame: number
+Current frame in the entire spritesheet.
+
+animFrame: number
+Current frame in relative to the animation that is currently playing.
+
+quad: Quad
+The rectangular area of the texture to render.
+
+play(anim: string, options?: SpriteAnimPlayOpt): void
+Play a piece of anim.
+
+stop(): void
+Stop current anim.
+
+numFrames(): number
+Get total number of frames.
+
+getCurAnim(): SpriteCurAnim | null
+Get the current animation data.
+
+sincev3001.0
+
+curAnim(): string | undefined
+Get current anim name.
+
+deprecatedUse `getCurAnim().name` instead.
+
+hasAnim(name: string): boolean
+Check if object's sprite has an animation.
+
+getAnim(name: string): SpriteAnim | null
+Get an animation.
+
+animSpeed: number
+Speed multiplier for all animations (for the actual fps for an anim use .play("anim", { speed: 10 })).
+
+flipX: boolean
+Flip texture horizontally.
+
+flipY: boolean
+Flip texture vertically.
+
+onAnimStart(action: (anim: string)=>void): KEventController
+Register an event that runs when an animation is played.
+
+onAnimEnd(action: (anim: string)=>void): KEventController
+Register an event that runs when an animation is ended.
+
+renderArea(): Rect
+sincev3000.0
+
+SpriteCompOpt:
+Options for the sprite component.
+
+frame?: number
+If the sprite is loaded with multiple frames, or sliced, use the frame option to specify which frame to draw.
+
+tiled?: boolean
+If provided width and height, don't stretch but instead render tiled.
+
+width?: number
+Stretch sprite to a certain width.
+
+height?: number
+Stretch sprite to a certain height.
+
+anim?: string
+Play an animation on start.
+
+animSpeed?: number
+Speed multiplier for all animations (for the actual fps for an anim use .play("anim", { speed: 10 })).
+
+flipX?: boolean
+Flip texture horizontally.
+
+flipY?: boolean
+Flip texture vertically.
+
+quad?: Quad
+The rectangular sub-area of the texture to render, default to full texture `quad(0, 0, 1, 1)`.
+
+fill?: boolean
+If fill the sprite (useful if you only want to render outline with outline() component).
+
+TextComp:
+The text component.
+
+draw: Comp[draw]
+text: string
+The text to render.
+
+renderedText: string
+The text after formatting.
+
+textSize: number
+The text size.
+
+font: string | BitmapFontData
+The font to use.
+
+width: number
+Width of text.
+
+height: number
+Height of text.
+
+align: TextAlign
+Text alignment ("left", "center" or "right", default "left").
+
+sincev3000.0
+
+lineSpacing: number
+The gap between each line.
+
+sincev2000.2
+
+letterSpacing: number
+The gap between each character.
+
+sincev2000.2
+
+textTransform: CharTransform | CharTransformFunc
+Transform the pos, scale, rotation or color for each character based on the index or char.
+
+sincev2000.1
+
+textStyles: Record<string, CharTransform | CharTransformFunc>
+Stylesheet for styled chunks, in the syntax of "this is a [style]text[/style] word".
+
+sincev2000.2
+
+renderArea(): Rect
+sincev3000.0
+
+TextCompOpt:
+Options for the text component.
+
+size?: number
+Height of text.
+
+font?: string | BitmapFontData
+The font to use.
+
+width?: number
+Wrap text to a certain width.
+
+align?: TextAlign
+Text alignment ("left", "center" or "right", default "left").
+
+sincev3000.0
+
+lineSpacing?: number
+The gap between each line.
+
+sincev2000.2
+
+letterSpacing?: number
+The gap between each character.
+
+sincev2000.2
+
+transform?: CharTransform | CharTransformFunc
+Transform the pos, scale, rotation or color for each character based on the index or char.
+
+sincev2000.1
+
+styles?: Record<string, CharTransform | CharTransformFunc>
+Stylesheet for styled chunks, in the syntax of "this is a [style]text[/style] word".
+
+sincev2000.2
+
+UVQuadComp:
+The uvquad component.
+
+draw: Comp[draw]
+width: number
+Width of rect.
+
+height: number
+Height of height.
+
+renderArea(): Rect
+sincev3000.0
+
+AgentComp:
+The agent component.
+
+agentSpeed: number
+allowDiagonals: boolean
+getDistanceToTarget(): number
+getNextLocation(): Vec2 | null
+getPath(): Vec2[] | null
+getTarget(): Vec2 | null
+isNavigationFinished(): boolean
+isTargetReachable(): boolean
+isTargetReached(): boolean
+setTarget(target: Vec2): void
+onNavigationStarted(cb: ()=>void): KEventController
+onNavigationNext(cb: ()=>void): KEventController
+onNavigationEnded(cb: ()=>void): KEventController
+onTargetReached(cb: ()=>void): KEventController
+AgentCompOpt:
+speed?: number
+allowDiagonals?: boolean
+Options for the agent component.
+
+FixedComp:
+The fixed component.
+
+fixed: boolean
+If the obj is unaffected by camera
+
+PosComp:
+The pos component.
+
+pos: Vec2
+Object's current world position.
+
+move(xVel: number, yVel: number): void
+Move how many pixels per second. If object is 'solid', it won't move into other 'solid' objects.
+
+move(vel: Vec2): void
+moveBy(dx: number, dy: number): void
+Move how many pixels, without multiplying dt, but still checking for 'solid'.
+
+moveBy(d: Vec2): void
+moveTo(dest: Vec2, speed?: number): void
+Move to a spot with a speed (pixels per second), teleports if speed is not given.
+
+moveTo(x: number, y: number, speed?: number): void
+screenPos(): Vec2 | null
+Get the position of the object on the screen.
+
+worldPos(): Vec2 | null
+Get the position of the object relative to the root.
+
+toScreen(this: GameObj, p: Vec2): Vec2
+Transform a local point (relative to this) to a screen point (relative to the camera)
+
+toWorld(this: GameObj, p: Vec2): Vec2
+Transform a local point (relative to this) to a world point (relative to the root)
+
+sincev3001.0
+
+fromScreen(this: GameObj, p: Vec2): Vec2
+Transform a screen point (relative to the camera) to a local point (relative to this)
+
+sincev3001.0
+
+fromWorld(this: GameObj, p: Vec2): Vec2
+Transform a world point (relative to the root) to a local point (relative to this)
+
+sincev3001.0
+
+toOther(this: GameObj, other: GameObj, p: Vec2): Vec2
+Transform a point relative to this to a point relative to other
+
+sincev3001.0
+
+fromOther(this: GameObj, other: GameObj, p: Vec2): Vec2
+Transform a point relative to other to a point relative to this
+
+sincev3001.0
+
+SentryComp:
+The sentry component.
+
+direction?: Vec2
+directionAngle?: number
+fieldOfView?: number
+spotted: GameObj[]
+onObjectsSpotted(cb: (objects: GameObj[])=>void): KEventController
+Attaches an event handler which is called when objects of interest are spotted.
+
+paramcbThe event handler called when objects are spotted.
+
+isWithinFieldOfView(obj: GameObj, direction?: Vec2, fieldOfView?: number): boolean
+Returns true if the object is within the field of view.
+
+paramobjThe object to test.
+
+paramdirectionThe direction to look at.
+
+paramfieldOfViewThe field of view in degrees.
+
+hasLineOfSight(obj: GameObj): boolean
+Returns true if there is a line of sight to the object.
+
+paramobjThe object to test.
+
+SentryCompOpt:
+Options for the sentry component.
+
+direction?: Vec2 | number
+fieldOfView?: number
+lineOfSight?: boolean
+raycastExclude?: string[]
+checkFrequency?: number
+TileComp:
+The tile component.
+
+tilePos: Vec2
+The tile position inside the level.
+
+isObstacle: boolean
+If the tile is an obstacle in pathfinding.
+
+cost: number
+How much a tile is cost to traverse in pathfinding (default 0).
+
+edges: Edge[]
+If the tile has hard edges that cannot pass in pathfinding.
+
+tilePosOffset: Vec2
+Position offset when setting `tilePos`.
+
+edgeMask: EdgeMask
+getLevel(): GameObj<LevelComp>
+tileMove(dir: Vec2): void
+moveLeft(): void
+moveRight(): void
+moveUp(): void
+moveDown(): void
+TileCompOpt:
+isObstacle?: boolean
+If the tile is an obstacle in pathfinding.
+
+cost?: number
+How much a tile is cost to traverse in pathfinding (default 0).
+
+edges?: Edge[]
+If the tile has hard edges that cannot pass in pathfinding.
+
+offset?: Vec2
+Position offset when setting `tilePos`.
+
+Options for the tile component.
+
+HealthComp:
+The health component.
+
+hurt(n?: number): void
+Decrease HP by n (defaults to 1).
+
+heal(n?: number): void
+Increase HP by n (defaults to 1).
+
+hp(): number
+Current health points.
+
+setHP(hp: number): void
+Set current health points.
+
+maxHP(): number | null
+Max amount of HP.
+
+setMaxHP(hp: number): void
+Set max amount of HP.
+
+onHurt(action: (amount?: number)=>void): KEventController
+Register an event that runs when hurt() is called upon the object.
+
+sincev2000.1
+
+onHeal(action: (amount?: number)=>void): KEventController
+Register an event that runs when heal() is called upon the object.
+
+sincev2000.1
+
+onDeath(action: ()=>void): KEventController
+Register an event that runs when object's HP is equal or below 0.
+
+sincev2000.1
+
